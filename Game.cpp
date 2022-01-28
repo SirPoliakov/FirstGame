@@ -3,11 +3,11 @@
 #include <random>
 #include <vector>
 
+
 using namespace std;
 
-bool hit = false;
-
 vector<Brick> bricks;
+
 
 bool Game::initialize()
 {
@@ -21,20 +21,24 @@ bool Game::initialize()
 	rightWall = { windowWidth - wallThickness, 0, wallThickness, static_cast<float>(windowHeight)};
 	leftWall = { 0, 0, wallThickness, static_cast<float>(windowHeight) };
 
-	float tmpX = 50; float tmpY = 50;
 	
-	for (int i = 1; i <= 4; i++)
+
+	float tmpX = 180; float tmpY = 200;
+	Brick tmpB;
+	for (int i = 1; i <= 10; i++)
 	{
-		for (int j = 1; j <= 4; j++)
+		for (int j = 1; j <= 10; j++)
 		{
-			Brick tmpB;
 			tmpB.pos.x = tmpX;
 			tmpB.pos.y = tmpY;
 			bricks.push_back(tmpB);
-			tmpX += 65;
+			tmpX += 75;
 		}
-		tmpY += 20;
+		tmpX = 180;
+		tmpY += 30;
+
 	}
+
 
 	return isWindowInit && isRendererInit; // Return bool && bool && bool ...to detect error
 }
@@ -118,12 +122,12 @@ void Game::update(float dt)
 	}
 
 	// Ball - Rect collision
-		for (int i = 0; i <= bricks.size(); i++)
+		for (int i = 0; i < bricks.size(); i++)
 		{
 			Vector2 collideDiff = ballPos - bricks[i].pos;
-			if (hit == false && fabsf(collideDiff.y) <= bricks[i].height / 2 && fabsf(collideDiff.x) <= bricks[i].width / 2)
+			if (bricks[i].hit == false && fabsf(collideDiff.y) <= bricks[i].height / 2 && fabsf(collideDiff.x) <= bricks[i].width / 2)
 			{
-				hit = true;
+				bricks[i].hit = true;
 				ballVelocity.y *= -1;
 			}
 		}
@@ -152,12 +156,12 @@ void Game::render()
 	const int r = dist6(rng);
 	const int g = dist6(rng);
 	const int b = dist6(rng);
-
+	
 	for (int i = 0; i < bricks.size(); i++)
 	{
 		if (bricks[i].hit == false)
 		{
-			Rectangle rect = { bricks[i].pos.x - bricks[i].width / 2, bricks[i].pos.x - bricks[i].width / 2, bricks[i].width, bricks[i].height };
+			Rectangle rect = { bricks[i].pos.x - bricks[i].width / 2, bricks[i].pos.y - bricks[i].height / 2, bricks[i].width, bricks[i].height };
 			renderer.drawRectRandom(rect, r, g, b);
 		}
 	}

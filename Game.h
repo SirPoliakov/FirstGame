@@ -30,7 +30,7 @@ private:
 	Game(): 
 		isRunning(true),
 		ballPos({ 100, 100 }),
-		ballVelocity({ 500, 500 }),
+		ballVelocity({ 250, 250 }),
 		paddle1Pos({ 500, 700 }),
 		paddle1Velocity({ 450, 0 }),
 		paddle1Direction(0),
