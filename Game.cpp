@@ -2,12 +2,19 @@
 #include "Timer.h"
 #include <random>
 #include <vector>
-
-
+#include <Math.h>
+#include <iostream>
 using namespace std;
 
-vector<Brick> bricks;
 
+
+int BRICK_W = 120;
+int BRICK_H = 50;
+int BRICK_GAP = 10;
+const int BRICK_COLS = 7;
+const int BRICK_ROWS = 7;
+
+vector<Brick> bricks;
 
 bool Game::initialize()
 {
@@ -18,27 +25,29 @@ bool Game::initialize()
 	int windowHeight = window.getHeight();
 	topWall = { 0, 0, static_cast<float>(windowWidth), wallThickness };
 	topWall = { 0, 0, static_cast<float>(windowWidth), wallThickness };
-	rightWall = { windowWidth - wallThickness, 0, wallThickness, static_cast<float>(windowHeight)};
+	rightWall = { windowWidth - wallThickness, 0, wallThickness, static_cast<float>(windowHeight) };
 	leftWall = { 0, 0, wallThickness, static_cast<float>(windowHeight) };
 
-	
 
-	float tmpX = 180; float tmpY = 200;
-	Brick tmpB;
-	for (int i = 1; i <= 10; i++)
+
+
+	Brick tmpB({ 120, 200 }, BRICK_W, BRICK_H);
+	for (int i = 0; i < BRICK_ROWS; i++)
 	{
-		for (int j = 1; j <= 10; j++)
+		for (int j = 0; j < BRICK_COLS; j++)
 		{
-			tmpB.pos.x = tmpX;
-			tmpB.pos.y = tmpY;
 			bricks.push_back(tmpB);
-			tmpX += 75;
+			tmpB.pos.x += BRICK_W;
 		}
-		tmpX = 180;
-		tmpY += 30;
+		tmpB.pos.x = 120;
+		tmpB.pos.y += BRICK_H;
 
 	}
 
+	for (int i = 0; i < BRICK_ROWS * BRICK_COLS; i++)
+	{
+		cout << "(" << bricks[i].pos.x << ";" << bricks[i].pos.y << ")" << endl;
+	}
 
 	return isWindowInit && isRendererInit; // Return bool && bool && bool ...to detect error
 }
@@ -81,7 +90,7 @@ void Game::processInput()
 		if ((ballVelocity.x == 0) && (ballVelocity.y == 0))
 		{
 			ballVelocity.x = 200;
-			ballVelocity.y = -200;		
+			ballVelocity.y = -200;
 		}
 	}
 }
@@ -121,16 +130,34 @@ void Game::update(float dt)
 		ballVelocity.y *= -1;
 	}
 
-	// Ball - Rect collision
-		for (int i = 0; i < bricks.size(); i++)
+	// Ball - rect collision
+	int caseX = floor(ballPos.x / BRICK_W) - 1;
+	int caseY = floor(ballPos.y / BRICK_H) - 4;
+	int index = caseX + caseY * 7;
+	if (index >= 0 && index < BRICK_ROWS * BRICK_COLS)
+	{
+		Vector2 surfBall = ballPos; surfBall.x += -10; surfBall.y += -10;
+		Vector2 collideDiff = surfBall - bricks[index].pos;
+		if (bricks[index].hit == false && fabsf(collideDiff.y) <= bricks[index].height - BRICK_GAP && fabsf(collideDiff.x) <= bricks[index].width - BRICK_GAP)
 		{
-			Vector2 collideDiff = ballPos - bricks[i].pos;
-			if (bricks[i].hit == false && fabsf(collideDiff.y) <= bricks[i].height / 2 && fabsf(collideDiff.x) <= bricks[i].width / 2)
+			int prevBallX = ballPos.x - ballVelocity.x;
+			int prevBallY = ballPos.y - ballVelocity.y;
+
+			int prevCaseX = floor(prevBallX / BRICK_W);
+			int prevCaseY = floor(prevBallY / BRICK_H);
+
+			if (prevCaseX != caseX)
 			{
-				bricks[i].hit = true;
+				ballVelocity.x *= -1;
+			}
+			if (prevCaseY != caseY)
+			{
 				ballVelocity.y *= -1;
 			}
+
+			bricks[index].hit = true;
 		}
+	}
 
 	// Restart automatically
 	if (ballPos.y > window.getHeight()) {
@@ -149,20 +176,12 @@ void Game::render()
 	renderer.drawRectRed(leftWall);
 
 
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 255);
-
-	const int r = dist6(rng);
-	const int g = dist6(rng);
-	const int b = dist6(rng);
-	
-	for (int i = 0; i < bricks.size(); i++)
+	for (int i = 0; i < BRICK_ROWS * BRICK_COLS; i++)
 	{
 		if (bricks[i].hit == false)
 		{
-			Rectangle rect = { bricks[i].pos.x - bricks[i].width / 2, bricks[i].pos.y - bricks[i].height / 2, bricks[i].width, bricks[i].height };
-			renderer.drawRectRandom(rect, r, g, b);
+			Rectangle rect = { bricks[i].pos.x, bricks[i].pos.y, bricks[i].width - BRICK_GAP, bricks[i].height - BRICK_GAP };
+			renderer.drawRectRandom(rect, 0, 0, 255);
 		}
 	}
 

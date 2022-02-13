@@ -5,9 +5,20 @@
 
 struct Brick {
 
+	Brick() : pos(0, 0), width(0), height(0) {}
+	Brick(const int w, const int h) : pos(0, 0), width(w), height(h) {}
+	Brick(Vector2 position, const int w, const int h) : pos(position), width(w), height(h) {}
+
+	void operator=(Brick maBrick)
+	{
+		this->pos = maBrick.pos;
+		this->width = maBrick.width;
+		this->height = maBrick.height;
+	}
+
 	Vector2 pos;
-	const float width = 65;
-	const float height = 20;
+	int width = 65;
+	int height = 20;
 	bool hit = false;
 };
 
